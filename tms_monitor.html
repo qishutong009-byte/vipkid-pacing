@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TMS · Real-time Monitor</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;background:#fff;min-height:100vh}
+.topnav{background:#1565c0;height:46px;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100}
+.tn-brand{display:flex;align-items:center;gap:6px;margin-right:20px}
+.tn-vip{background:#fff;color:#1565c0;font-weight:900;font-size:10px;padding:2px 5px;border-radius:2px;letter-spacing:-.3px}
+.tn-kid{color:#fff;font-weight:700;font-size:15px;letter-spacing:.5px}
+.tn-sys{color:rgba(255,255,255,.75);font-size:13px;border-left:1px solid rgba(255,255,255,.3);padding-left:10px;margin-left:4px}
+.tn-menu{display:flex;height:46px}
+.tn-item{color:rgba(255,255,255,.85);padding:0 14px;font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+.tn-item:hover{background:rgba(255,255,255,.1);color:#fff}
+.tn-item.active{color:#fff;border-bottom:3px solid #fff}
+.tn-right{margin-left:auto;display:flex;align-items:center;gap:14px;color:rgba(255,255,255,.85);font-size:12px}
+.tn-right i{font-size:16px;cursor:pointer}
+
+.layout{display:flex;min-height:calc(100vh - 46px)}
+.sidebar{width:190px;background:#fff;border-right:1px solid #e8e8e8;flex-shrink:0}
+.sb-item{padding:10px 18px;font-size:13px;color:#333;cursor:pointer;border-left:3px solid transparent;display:flex;align-items:center;justify-content:space-between;transition:.1s;user-select:none}
+.sb-item:hover{background:#f5f7fa;color:#1565c0}
+.sb-item.active{color:#1565c0;font-weight:500;border-left:3px solid #1565c0;background:#f0f5ff}
+.sb-sub{overflow:hidden;max-height:0;transition:max-height .22s ease}
+.sb-sub.open{max-height:200px}
+.sb-child{padding:8px 18px 8px 30px;font-size:12px;color:#555;cursor:pointer;display:block;border-left:3px solid transparent;transition:.1s}
+.sb-child:hover{background:#f5f7fa;color:#1565c0}
+.sb-arrow{font-size:12px;color:#bbb;transition:transform .2s}
+.sb-arrow.open{transform:rotate(180deg)}
+
+.main{flex:1;padding:18px 22px;min-width:0;background:#fff}
+.breadcrumb{font-size:12px;color:#999;margin-bottom:14px;display:flex;align-items:center;gap:4px}
+.breadcrumb a{color:#1565c0;cursor:pointer}
+.breadcrumb a:hover{text-decoration:underline}
+
+.screen{display:none}
+.screen.active{display:block}
+
+.page-card{background:#fff;border:1px solid #e8e8e8;border-radius:3px}
+
+.filter-bar{padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;border-bottom:1px solid #f0f0f0;background:#fff}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:11px;color:#777}
+.fi{border:1px solid #d9d9d9;border-radius:3px;padding:0 8px;font-size:12px;color:#333;height:30px;background:#fff}
+.fi:focus{outline:none;border-color:#1565c0}
+.fs{border:1px solid #d9d9d9;border-radius:3px;padding:0 22px 0 8px;font-size:12px;color:#333;height:30px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E") no-repeat right 7px center;appearance:none;cursor:pointer}
+.fs:focus{outline:none;border-color:#1565c0}
+.date-range{display:flex;align-items:center;gap:5px}
+.date-range span{font-size:12px;color:#999}
+.btn-search{background:#1565c0;color:#fff;border:none;border-radius:3px;padding:0 14px;font-size:12px;height:30px;cursor:pointer;display:flex;align-items:center;gap:4px}
+.btn-search:hover{background:#1255a8}
+.btn-reset{background:#fff;color:#555;border:1px solid #d9d9d9;border-radius:3px;padding:0 12px;font-size:12px;height:30px;cursor:pointer;display:flex;align-items:center;gap:4px}
+.btn-reset:hover{border-color:#999}
+.btn-new{background:#f5a623;color:#fff;border:none;border-radius:3px;padding:0 14px;font-size:12px;height:30px;cursor:pointer;display:flex;align-items:center;gap:4px;font-weight:500}
+.btn-new:hover{background:#e8941a}
+
+.tbl-wrap{overflow-x:auto;background:#fff}
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{background:#fafafa;border-bottom:1px solid #e8e8e8;padding:10px 12px;text-align:left;font-weight:500;color:#666;white-space:nowrap}
+.data-table td{padding:10px 12px;border-bottom:1px solid #f5f5f5;color:#333;vertical-align:middle;background:#fff}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:#f9fbff}
+
+.sb{display:inline-block;padding:2px 8px;border-radius:2px;font-size:11px;font-weight:500;white-space:nowrap}
+.s-pending{background:#fff7e6;color:#854f0b}
+.s-dispatched{background:#e6f1fb;color:#0c447c}
+.s-completed{background:#eaf3de;color:#27500a}
+.s-cancelled{background:#f5f5f5;color:#5f5e5a}
+.s-failed{background:#fcebeb;color:#791f1f}
+
+.al{color:#1565c0;cursor:pointer;font-size:12px}
+.al:hover{text-decoration:underline}
+.al.off{color:#bbb;cursor:default;pointer-events:none}
+.al.red{color:#e24b4a}
+.al.red:hover{text-decoration:underline}
+.sep{color:#d9d9d9;margin:0 3px;font-size:12px}
+
+.pagination{padding:12px 16px;display:flex;align-items:center;gap:5px;font-size:12px;color:#666;background:#fff}
+.pg-in{width:36px;border:1px solid #d9d9d9;border-radius:3px;padding:3px 4px;font-size:12px;text-align:center}
+.pg-btn{border:1px solid #d9d9d9;background:#fff;color:#555;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:3px;font-size:12px}
+.pg-btn:hover{border-color:#1565c0;color:#1565c0}
+.pg-btn.cur{background:#1565c0;color:#fff;border-color:#1565c0}
+.pg-sz{border:1px solid #d9d9d9;border-radius:3px;padding:3px 18px 3px 6px;font-size:12px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E") no-repeat right 5px center;appearance:none}
+.pg-total{margin-left:auto;color:#999}
+
+.detail-card{background:#fff;border:1px solid #e8e8e8;border-radius:3px;padding:22px 26px}
+.det-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #f0f0f0}
+.det-title{font-size:15px;font-weight:500;color:#222;display:flex;align-items:center;gap:10px}
+.btn-back{background:#fff;color:#555;border:1px solid #d9d9d9;border-radius:3px;padding:5px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.btn-back:hover{border-color:#999}
+.dsec{margin-bottom:22px}
+.dsec-title{font-size:13px;font-weight:500;color:#1565c0;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e8f0fb;display:flex;align-items:center;gap:6px}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 16px}
+.dgrid2{grid-template-columns:repeat(2,1fr)}
+.di{display:flex;flex-direction:column;gap:3px}
+.di-l{font-size:11px;color:#aaa}
+.di-v{font-size:13px;color:#333}
+.ev-table{width:100%;border-collapse:collapse;font-size:12px}
+.ev-table th{background:#fafafa;border:1px solid #ebebeb;padding:8px 12px;font-weight:500;color:#666;text-align:left}
+.ev-table td{border:1px solid #f0f0f0;padding:8px 12px;color:#333;vertical-align:middle;background:#fff}
+.ev-table tr:nth-child(even) td{background:#fafcff}
+.tag-y{background:#eaf3de;color:#27500a;padding:2px 8px;border-radius:2px;font-size:11px}
+.tag-n{background:#fcebeb;color:#791f1f;padding:2px 8px;border-radius:2px;font-size:11px}
+.ev-note{font-size:11px;color:#aaa;margin-top:8px;padding-top:8px;border-top:1px solid #f5f5f5;line-height:1.5}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:4px;width:640px;max-width:96vw;box-shadow:0 8px 32px rgba(0,0,0,.18);overflow:hidden}
+.modal-sm{width:420px}
+.modal-hd{background:#1565c0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.modal-hd-title{font-size:14px;font-weight:500;color:#fff;display:flex;align-items:center;gap:8px}
+.modal-close{background:none;border:none;color:rgba(255,255,255,.8);font-size:20px;cursor:pointer;line-height:1;padding:0}
+.modal-close:hover{color:#fff}
+.modal-body{padding:24px 26px;background:#fff}
+.modal-ft{padding:14px 20px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:10px;background:#fff}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px;margin-bottom:16px}
+.form-full{grid-column:1/-1}
+.ff{display:flex;flex-direction:column;gap:5px}
+.ff label{font-size:12px;color:#555;font-weight:500}
+.req{color:#e24b4a;margin-left:2px}
+.ff input,.ff select{border:1px solid #d9d9d9;border-radius:3px;padding:0 10px;font-size:12px;color:#333;background:#fff;height:32px}
+.ff input:focus,.ff select:focus{outline:none;border-color:#1565c0}
+.ff-hint{font-size:11px;color:#aaa;margin-top:2px}
+.rate-row{display:flex;align-items:center;gap:8px}
+.rate-row input{width:70px}
+.cb-group{display:flex;gap:20px;flex-wrap:wrap;margin-top:4px}
+.cb-item{display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;user-select:none}
+.cb-item.off{color:#bbb;cursor:default}
+.cb-item.off input{cursor:default}
+
+.btn-submit{background:#1565c0;color:#fff;border:none;border-radius:3px;padding:6px 22px;font-size:13px;cursor:pointer;font-weight:500;height:34px}
+.btn-submit:hover{background:#1255a8}
+.btn-cancel{background:#fff;color:#555;border:1px solid #d9d9d9;border-radius:3px;padding:6px 22px;font-size:13px;cursor:pointer;height:34px}
+.btn-cancel:hover{border-color:#999}
+.confirm-txt{font-size:13px;color:#333;line-height:1.7}
+.confirm-warn{font-size:12px;color:#854f0b;background:#fff7e6;padding:8px 12px;border-radius:3px;border-left:3px solid #f5a623;margin-top:10px}
+
+/* ── Custom English date input ── */
+.date-wrap{position:relative;display:inline-flex;align-items:center;height:30px}
+.date-wrap.modal-date{height:32px}
+.date-display{
+  border:1px solid #d9d9d9;border-radius:3px;
+  padding:0 28px 0 8px;font-size:12px;color:#333;
+  background:#fff;height:100%;min-width:128px;
+  cursor:pointer;display:flex;align-items:center;
+  user-select:none;white-space:nowrap;
+}
+.date-display.placeholder{color:#bbb}
+.date-display:hover{border-color:#1565c0}
+.date-display.focused{border-color:#1565c0;outline:none}
+.date-wrap i.cal-icon{
+  position:absolute;right:7px;top:50%;transform:translateY(-50%);
+  font-size:14px;color:#bbb;pointer-events:none;
+}
+.date-input-hidden{
+  position:absolute;inset:0;opacity:0;cursor:pointer;
+  width:100%;height:100%;
+}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <div class="tn-brand">
+    <div class="tn-vip">VIP</div>
+    <div class="tn-kid">KID</div>
+    <span class="tn-sys">TMS</span>
+  </div>
+  <div class="tn-menu">
+    <div class="tn-item">TR Mgmt. <i class="ti ti-chevron-down" style="font-size:11px" aria-hidden="true"></i></div>
+    <div class="tn-item active">Info Mgmt <i class="ti ti-chevron-down" style="font-size:11px" aria-hidden="true"></i></div>
+    <div class="tn-item">Service Mgmt. <i class="ti ti-chevron-down" style="font-size:11px" aria-hidden="true"></i></div>
+    <div class="tn-item">Activity Mgmt. <i class="ti ti-chevron-down" style="font-size:11px" aria-hidden="true"></i></div>
+    <div class="tn-item">Project Mgmt. <i class="ti ti-chevron-down" style="font-size:11px" aria-hidden="true"></i></div>
+  </div>
+  <div class="tn-right">
+    <i class="ti ti-star" aria-hidden="true"></i>
+    <i class="ti ti-bell" aria-hidden="true"></i>
+    <span>Welcome 奇姝彤</span>
+    <span style="color:rgba(255,255,255,.4);cursor:pointer">Exit</span>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-item" onclick="toggleGrp('g-class')">
+      Classroom Live <i id="arr-g-class" class="ti ti-chevron-down sb-arrow" aria-hidden="true"></i>
+    </div>
+    <div class="sb-sub" id="g-class">
+      <a class="sb-child">Class List</a>
+      <a class="sb-child">Live Monitor</a>
+    </div>
+    <div class="sb-item">NPF Tag&amp;Content</div>
+    <div class="sb-item">Group Management</div>
+    <div class="sb-item" onclick="toggleGrp('g-pre')">
+      Pre-purchase Mgmt <i id="arr-g-pre" class="ti ti-chevron-down sb-arrow" aria-hidden="true"></i>
+    </div>
+    <div class="sb-sub" id="g-pre">
+      <a class="sb-child">Pre-purchase List</a>
+      <a class="sb-child">Pre-purchase Rules</a>
+    </div>
+    <div class="sb-item" onclick="toggleGrp('g-fb')">
+      Parents Feedback <i id="arr-g-fb" class="ti ti-chevron-down sb-arrow" aria-hidden="true"></i>
+    </div>
+    <div class="sb-sub" id="g-fb">
+      <a class="sb-child">Review Task</a>
+      <a class="sb-child">Complaint Mgmt</a>
+      <a class="sb-child">All Feedback</a>
+    </div>
+    <div class="sb-item" onclick="toggleGrp('g-eval')">
+      Class Evaluation <i id="arr-g-eval" class="ti ti-chevron-down sb-arrow open" aria-hidden="true"></i>
+    </div>
+    <div class="sb-sub open" id="g-eval">
+      <a class="sb-child">Class Review</a>
+    </div>
+    <div class="sb-item active" onclick="goPage('list')">Real-time Monitor</div>
+  </div>
+
+  <div class="main">
+
+    <!-- LIST -->
+    <div id="screen-list" class="screen active">
+      <div class="breadcrumb">
+        Info Mgmt
+        <i class="ti ti-chevron-right" style="font-size:11px" aria-hidden="true"></i>
+        <span style="color:#333">Real-time Monitor</span>
+      </div>
+      <div class="page-card">
+        <div class="filter-bar">
+          <div class="fg">
+            <label>Teacher ID</label>
+            <input class="fi" placeholder="Enter teacher ID" style="min-width:120px">
+          </div>
+          <div class="fg">
+            <label>Business Line</label>
+            <select class="fs" style="min-width:100px">
+              <option value="">All</option><option>MC</option><option>NMC</option><option>EIF</option><option>VIPKID GO</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Monitor Type</label>
+            <select class="fs" style="min-width:130px">
+              <option value="">All</option><option>Pacing Monitor</option><option>Behavior Monitor</option><option>Sensitive Content Monitor</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Status</label>
+            <select class="fs" style="min-width:110px">
+              <option value="">All</option><option>Pending</option><option>Dispatched</option><option>Completed</option><option>Cancelled</option><option>Failed</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Monitor Period</label>
+            <div class="date-range">
+              <div class="date-wrap">
+              <span class="date-display placeholder">MM / DD / YYYY</span>
+              <i class="ti ti-calendar cal-icon" aria-hidden="true"></i>
+              <input class="date-input-hidden" type="date">
+            </div>
+              <span>to</span>
+              <div class="date-wrap">
+              <span class="date-display placeholder">MM / DD / YYYY</span>
+              <i class="ti ti-calendar cal-icon" aria-hidden="true"></i>
+              <input class="date-input-hidden" type="date">
+            </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <button class="btn-search"><i class="ti ti-search" style="font-size:12px" aria-hidden="true"></i> Search</button>
+            <button class="btn-reset" onclick="resetFilters()"><i class="ti ti-x" style="font-size:12px" aria-hidden="true"></i> Reset</button>
+            <button class="btn-new" onclick="openNewModal()"><i class="ti ti-plus" style="font-size:12px" aria-hidden="true"></i> New Task</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Teacher ID</th>
+                <th>Business Line</th>
+                <th>Monitor Type</th>
+                <th>Monitor Period</th>
+                <th>Sessions</th>
+                <th>Status</th>
+                <th>Created By / Time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="taskTbody"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span>Go to</span>
+          <input class="pg-in" value="1">
+          <div class="pg-btn">‹</div>
+          <div class="pg-btn cur">1</div>
+          <div class="pg-btn">2</div>
+          <div class="pg-btn">3</div>
+          <div class="pg-btn">›</div>
+          <select class="pg-sz"><option>20 /page</option><option>50 /page</option></select>
+          <span class="pg-total">Total 6</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL -->
+    <div id="screen-detail" class="screen">
+      <div class="breadcrumb">
+        Info Mgmt
+        <i class="ti ti-chevron-right" style="font-size:11px" aria-hidden="true"></i>
+        <a onclick="goPage('list')">Real-time Monitor</a>
+        <i class="ti ti-chevron-right" style="font-size:11px" aria-hidden="true"></i>
+        <span style="color:#333" id="detailBread">Task Detail</span>
+      </div>
+      <div class="detail-card">
+        <div class="det-header">
+          <div class="det-title">
+            <span id="detailId"></span>
+            <span class="sb" id="detailStatus"></span>
+          </div>
+          <button class="btn-back" onclick="goPage('list')">
+            <i class="ti ti-arrow-left" style="font-size:13px" aria-hidden="true"></i> Back to List
+          </button>
+        </div>
+        <div class="dsec">
+          <div class="dsec-title"><i class="ti ti-file-description" style="font-size:14px" aria-hidden="true"></i> Task Dispatch Detail</div>
+          <div class="dgrid" id="detailMeta"></div>
+        </div>
+        <div class="dsec">
+          <div class="dsec-title"><i class="ti ti-circle-check" style="font-size:14px" aria-hidden="true"></i> Dispatch Status</div>
+          <div class="dgrid dgrid2" id="detailDispatch"></div>
+        </div>
+        <div class="dsec">
+          <div class="dsec-title">
+            <i class="ti ti-alert-triangle" style="font-size:14px" aria-hidden="true"></i>
+            Anomaly Records
+            <span style="font-size:11px;color:#aaa;font-weight:400;margin-left:4px">(includes both alerted and limit-exceeded unalerted events)</span>
+          </div>
+          <table class="ev-table">
+            <thead>
+              <tr>
+                <th>Event Type</th>
+                <th>Trigger Time</th>
+                <th>Detail</th>
+                <th>Alert Sent</th>
+                <th>Reason (if not sent)</th>
+              </tr>
+            </thead>
+            <tbody id="eventTbody"></tbody>
+          </table>
+          <div class="ev-note">Note: reminder_sent = false records were triggered but not pushed due to reaching the reminder limit. All records are retained for operational review.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NEW TASK MODAL -->
+<div class="overlay" id="newModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-hd-title"><i class="ti ti-clipboard-plus" style="font-size:15px" aria-hidden="true"></i> New Monitor Task</div>
+      <button class="modal-close" onclick="closeModal('newModal')" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="ff">
+          <label>Teacher ID <span class="req">*</span></label>
+          <input placeholder="Enter teacher ID(s), separate by comma or line break">
+          
+        </div>
+        <div class="ff">
+          <label>Course Type <span class="req">*</span></label>
+          <select><option value="">Please select</option><option>Trial</option><option>Regular</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff">
+          <label>Monitor Period <span class="req">*</span></label>
+          <div class="date-range" style="gap:6px">
+            <div class="date-wrap modal-date" style="flex:1">
+              <span class="date-display placeholder" style="min-width:0;width:100%">MM / DD / YYYY</span>
+              <i class="ti ti-calendar cal-icon" aria-hidden="true"></i>
+              <input class="date-input-hidden" type="date">
+            </div>
+            <span style="color:#999;font-size:12px">to</span>
+            <div class="date-wrap modal-date" style="flex:1">
+              <span class="date-display placeholder" style="min-width:0;width:100%">MM / DD / YYYY</span>
+              <i class="ti ti-calendar cal-icon" aria-hidden="true"></i>
+              <input class="date-input-hidden" type="date">
+            </div>
+          </div>
+          
+        </div>
+        <div class="ff">
+          <label>Business Line <span class="req">*</span></label>
+          <select><option value="">Please select (multi-select supported)</option><option>MC</option><option>NMC</option><option>EIF</option><option>VIPKID GO</option></select>
+          
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff">
+          <label>Sampling Rate <span class="req">*</span></label>
+          <div class="rate-row">
+            <input type="number" id="rateInput" value="1" min="1" max="100" oninput="updateRateHint()">
+            <span style="font-size:12px;color:#555">%</span>
+          </div>
+          
+        </div>
+        <div class="ff">
+          <label>Lesson Name</label>
+          <input placeholder="">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff form-full">
+          <label>Monitor Type <span class="req">*</span></label>
+          <div class="cb-group">
+            <label class="cb-item"><input type="checkbox" checked> Pacing Monitor</label>
+            <label class="cb-item off"><input type="checkbox" disabled> Behavior Monitor</label>
+            <label class="cb-item off"><input type="checkbox" disabled> Sensitive Content Monitor</label>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('newModal')">Cancel</button>
+      <button class="btn-submit" onclick="submitTask()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- CANCEL CONFIRM MODAL -->
+<div class="overlay" id="cancelModal">
+  <div class="modal modal-sm">
+    <div class="modal-hd">
+      <div class="modal-hd-title">Confirm Cancellation</div>
+      <button class="modal-close" onclick="closeModal('cancelModal')" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-txt">Are you sure you want to cancel task <strong id="cancelTaskId"></strong>?</div>
+      <div class="confirm-warn">The task status will be changed to Cancelled. This action cannot be undone.</div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('cancelModal')">Go Back</button>
+      <button style="background:#e24b4a;color:#fff;border:none;border-radius:3px;padding:6px 18px;font-size:13px;cursor:pointer;height:34px" onclick="confirmCancel()">Confirm Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS TOAST -->
+<div id="successToast" style="
+  display:none;position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:300;
+  background:#fff;border:1px solid #b7d9a8;border-radius:4px;
+  box-shadow:0 4px 16px rgba(0,0,0,.12);
+  padding:11px 18px;align-items:center;gap:10px;
+  min-width:180px;max-width:320px;white-space:nowrap;
+  animation:fadeInDown .25s ease;
+">
+  <i class="ti ti-circle-check" style="font-size:18px;color:#27500a;flex-shrink:0" aria-hidden="true"></i>
+  <span style="font-size:13px;color:#222;flex:1">Task Created</span>
+  <button onclick="hideToast()" style="background:none;border:none;color:#aaa;font-size:16px;cursor:pointer;padding:0;line-height:1;flex-shrink:0" aria-label="Close">×</button>
+</div>
+<style>
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+</style>
+
+<script>
+const STATUS_CLS={Pending:'s-pending',Dispatched:'s-dispatched',Completed:'s-completed',Cancelled:'s-cancelled',Failed:'s-failed'};
+let cancelTarget=null;
+
+const TASKS=[
+  {id:'TK-2025-001',tid:'T001234',bl:'MC',type:'Pacing Monitor',period:'2025-05-01 ~ 05-31',n:2,status:'Completed',creator:'wangzhanlian',ctime:'2025-05-01 09:12',
+   meta:[['Teacher ID','T001234'],['Course Type','Regular'],['Lesson ID','LC-20250512-8841'],['Lesson Name','NMC-L1-U10-LC1-2'],['Business Line','MC'],['Monitor Type','Pacing Monitor'],['Class Start Time','2025-05-12 10:00'],['Dispatch Time','2025-05-12 09:58'],['Duration','25 min']],
+   dispatch:[['Dispatch Status','<span class="sb s-completed">Success</span>'],['Failure / Cancel Reason','<span style="color:#aaa">—</span>']],
+   events:[['Progress Reminder','10:13:04','13-minute mark triggered','<span class="tag-y">Sent</span>','<span style="color:#aaa">—</span>'],
+           ['Page Skip (skip_page)','10:18:32','4 pages skipped within 8s','<span class="tag-n">Not Sent</span>','Reminder limit reached (25-min class ≤ 1 alert)']]},
+  {id:'TK-2025-002',tid:'T002891',bl:'NMC',type:'Pacing Monitor',period:'2025-05-10 ~ 06-10',n:1,status:'Dispatched',creator:'wangzhanlian',ctime:'2025-05-10 14:20',meta:[],dispatch:[],events:[]},
+  {id:'TK-2025-003',tid:'T003457',bl:'EIF',type:'Pacing Monitor',period:'2025-04-15 ~ 05-15',n:1,status:'Pending',creator:'wangzhanlian',ctime:'2025-04-15 10:00',meta:[],dispatch:[],events:[]},
+  {id:'TK-2025-004',tid:'T004120',bl:'MC',type:'Pacing Monitor',period:'2025-05-01 ~ 05-31',n:2,status:'Cancelled',creator:'chenchunnuan',ctime:'2025-05-01 11:30',
+   meta:[['Teacher ID','T004120'],['Course Type','Trial'],['Lesson ID','—'],['Business Line','MC'],['Monitor Type','Pacing Monitor'],['Dispatch Time','2025-05-01 11:32']],
+   dispatch:[['Dispatch Status','<span class="sb s-cancelled">Cancelled</span>'],['Failure / Cancel Reason','First session status was TC (Teacher Cancel). Task auto-cancelled.']],
+   events:[]},
+  {id:'TK-2025-005',tid:'T005832',bl:'NMC',type:'Pacing Monitor',period:'2025-05-20 ~ 06-20',n:3,status:'Completed',creator:'zhangfeipeng',ctime:'2025-05-20 08:45',
+   meta:[['Teacher ID','T005832'],['Course Type','Regular'],['Lesson ID','LC-20250522-3314'],['Lesson Name','EIF-L1-U1-LC1-9'],['Business Line','NMC'],['Monitor Type','Pacing Monitor'],['Class Start Time','2025-05-22 09:00'],['Dispatch Time','2025-05-22 08:58'],['Duration','50 min']],
+   dispatch:[['Dispatch Status','<span class="sb s-completed">Success</span>'],['Failure / Cancel Reason','<span style="color:#aaa">—</span>']],
+   events:[['Progress Reminder','09:15:02','15-minute mark triggered','<span class="tag-y">Sent</span>','<span style="color:#aaa">—</span>'],
+           ['Long Stay (long_stay)','09:24:18','Stayed on same page for 6m 12s','<span class="tag-y">Sent</span>','<span style="color:#aaa">—</span>'],
+           ['Progress Reminder','09:35:05','35-minute mark triggered','<span class="tag-n">Not Sent</span>','Reminder limit reached (50-min class ≤ 2 alerts)']]},
+  {id:'TK-2025-006',tid:'T006241',bl:'EIF',type:'Pacing Monitor',period:'2025-06-01 ~ 06-30',n:1,status:'Failed',creator:'chenchunnuan',ctime:'2025-06-01 09:00',
+   meta:[['Teacher ID','T006241'],['Course Type','Regular'],['Business Line','EIF'],['Monitor Type','Pacing Monitor'],['Dispatch Time','2025-06-01 09:01']],
+   dispatch:[['Dispatch Status','<span class="sb s-failed">Failed</span>'],['Failure / Cancel Reason','Dispatch failed: course system API timeout. Please contact tech support and retry.']],
+   events:[]},
+];
+
+function renderTable(){
+  const tbody=document.getElementById('taskTbody');
+  tbody.innerHTML='';
+  TASKS.forEach(t=>{
+    const canView=['Completed','Cancelled','Failed'].includes(t.status);
+    const isPending=t.status==='Pending';
+    let ops=`<a class="al${canView?'':' off'}" onclick="${canView?`showDetail('${t.id}')`:''}"">Details</a>`;
+    if(isPending) ops+=`<span class="sep">·</span><a class="al red" onclick="openCancel('${t.id}')">Cancel</a>`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${t.tid}</td>
+      <td>${t.bl}</td>
+      <td>${t.type}</td>
+      <td style="white-space:nowrap">${t.period}</td>
+      <td style="text-align:center">${t.n}</td>
+      <td><span class="sb ${STATUS_CLS[t.status]}">${t.status}</span></td>
+      <td style="font-size:11px;color:#888">${t.creator}<br>${t.ctime}</td>
+      <td>${ops}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function showDetail(id){
+  const t=TASKS.find(x=>x.id===id);
+  if(!t) return;
+  document.getElementById('detailId').textContent=t.id;
+  const st=document.getElementById('detailStatus');
+  st.className=`sb ${STATUS_CLS[t.status]}`;
+  st.textContent=t.status;
+  document.getElementById('detailBread').textContent=t.id;
+  document.getElementById('detailMeta').innerHTML=t.meta.map(([l,v])=>`<div class="di"><div class="di-l">${l}</div><div class="di-v">${v}</div></div>`).join('');
+  document.getElementById('detailDispatch').innerHTML=t.dispatch.map(([l,v])=>`<div class="di"><div class="di-l">${l}</div><div class="di-v">${v}</div></div>`).join('');
+  const eb=document.getElementById('eventTbody');
+  eb.innerHTML=t.events.length===0
+    ?`<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px">No anomaly events recorded</td></tr>`
+    :t.events.map(ev=>`<tr>${ev.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+  goPage('detail');
+}
+
+function goPage(p){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+p).classList.add('active');
+}
+
+function toggleGrp(id){
+  const sub=document.getElementById(id);
+  const arr=document.getElementById('arr-'+id);
+  const open=sub.classList.contains('open');
+  sub.classList.toggle('open',!open);
+  arr.classList.toggle('open',!open);
+}
+
+function openNewModal(){document.getElementById('newModal').classList.add('open');}
+function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('open');}
+function updateRateHint(){}
+
+let toastTimeout=null;
+function submitTask(){
+  closeModal('newModal');
+  showToast();
+}
+function showToast(){
+  const t=document.getElementById('successToast');
+  t.style.display='flex';
+  clearTimeout(toastTimeout);
+  toastTimeout=setTimeout(hideToast,3000);
+}
+function hideToast(){
+  const t=document.getElementById('successToast');
+  t.style.display='none';
+  clearTimeout(toastTimeout);
+}
+
+function openCancel(id){
+  cancelTarget=id;
+  document.getElementById('cancelTaskId').textContent=id;
+  document.getElementById('cancelModal').classList.add('open');
+}
+
+function confirmCancel(){
+  const t=TASKS.find(x=>x.id===cancelTarget);
+  if(t) t.status='Cancelled';
+  renderTable();
+initDateInputs();
+  closeModal('cancelModal');
+}
+
+function resetFilters(){
+  document.querySelectorAll('#screen-list input,#screen-list select').forEach(el=>{
+    if(el.type==='date') el.value='';
+    else if(el.tagName==='SELECT') el.selectedIndex=0;
+    else el.value='';
+  });
+}
+
+function initDateInputs(){
+  document.querySelectorAll('.date-input-hidden').forEach(input=>{
+    const display = input.previousElementSibling.previousElementSibling;
+    function fmt(v){
+      if(!v) return null;
+      const [y,m,d]=v.split('-');
+      return `${m}/${d}/${y}`;
+    }
+    input.addEventListener('change',()=>{
+      if(input.value){
+        display.textContent=fmt(input.value);
+        display.classList.remove('placeholder');
+      } else {
+        display.textContent='MM / DD / YYYY';
+        display.classList.add('placeholder');
+      }
+    });
+    input.addEventListener('focus',()=>display.classList.add('focused'));
+    input.addEventListener('blur',()=>display.classList.remove('focused'));
+  });
+}
+document.addEventListener('DOMContentLoaded', initDateInputs);
+
+renderTable();
+initDateInputs();
+</script>
+</body>
+</html>
