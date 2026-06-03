@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VIPKid 教室 · Pacing 提醒原型</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#c8c8c8;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+
+/* ── window ── */
+.win{width:1200px;border-radius:10px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.45);display:flex;flex-direction:column;background:#ececec}
+
+/* title bar */
+.titlebar{height:36px;background:linear-gradient(180deg,#f4f4f4,#e2e2e2);border-bottom:1px solid #b8b8b8;display:flex;align-items:center;padding:0 14px;position:relative;flex-shrink:0}
+.traffic{display:flex;gap:6px}
+.tdot{width:12px;height:12px;border-radius:50%;cursor:default}
+.win-title{position:absolute;left:50%;transform:translateX(-50%);font-size:12px;color:#333;font-weight:500;white-space:nowrap}
+.win-icons{margin-left:auto;display:flex;gap:12px;color:#999;font-size:15px}
+
+/* ── TOP ROW ── */
+.top-row{display:grid;grid-template-columns:220px 1fr 220px;border-bottom:1px solid #c0c0c0;background:#fff;flex-shrink:0}
+
+/* top-left: class finished + stars */
+.tl-panel{border-right:1px solid #ddd;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 10px;gap:10px}
+.class-done{font-size:12px;color:#aaa}
+.stars{display:flex;gap:6px}
+.star{font-size:26px;color:#ddd;cursor:pointer;transition:.15s;user-select:none}
+.star:hover,.star.lit{color:#f5a623}
+
+/* top-mid: student info */
+.tm-panel{display:flex;flex-direction:column;overflow:hidden}
+.info-tabs{display:flex;border-bottom:1px solid #e8e8e8;flex-shrink:0}
+.itab{flex:1;padding:9px 8px;font-size:11px;text-align:center;cursor:pointer;color:#999;border-bottom:2px solid transparent;transition:.12s}
+.itab.active{color:#222;font-weight:700;border-bottom:2px solid #222}
+.info-body{flex:1;padding:12px 16px;overflow-y:auto}
+.ifield{margin-bottom:11px}
+.ifl{font-size:11px;font-weight:700;color:#222;margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.ifl::before{content:'';width:7px;height:7px;border-radius:50%;background:#ff6b00;flex-shrink:0}
+.ifv{font-size:11px;color:#666;line-height:1.45}
+.written-badge{display:inline-block;border:1px solid #e87722;color:#e87722;font-size:9px;padding:1px 5px;border-radius:3px;margin-left:5px}
+
+/* top-right: action buttons */
+.tr-panel{border-left:1px solid #ddd;display:grid;grid-template-columns:repeat(3,1fr);align-content:start;gap:0}
+.action-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 4px;cursor:pointer;border-bottom:1px solid #f0f0f0;border-right:1px solid #f0f0f0;transition:.12s}
+.action-btn:hover{background:#fafafa}
+.action-btn:nth-child(3n){border-right:none}
+.ab-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.ab-label{font-size:10px;color:#555;text-align:center;line-height:1.2}
+.ic-o{background:#fff3ea} .ic-r{background:#fff0f0} .ic-g{background:#f2f2f2} .ic-b{background:#eef4ff}
+
+/* ── BOTTOM ROW ── */
+.bot-row{display:grid;grid-template-columns:1fr 340px 220px;flex:1;overflow:hidden;min-height:0}
+
+/* bot-left: slide */
+.slide-col{background:#111;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.slide-frame{flex:1;position:relative;overflow:hidden;
+  background:radial-gradient(ellipse at 60% 40%,#5cbf60 0%,#3d9940 35%,#2a7a2e 70%,#1e5c24 100%)}
+
+/* trees */
+.trees{position:absolute;bottom:0;left:0;right:0;height:36%;display:flex;align-items:flex-end;pointer-events:none}
+.tree{background:#1a5020;clip-path:polygon(50% 0%,100% 100%,0% 100%);flex-shrink:0}
+
+.slide-inner{position:relative;z-index:2;width:86%;max-width:580px;margin:0 auto;text-align:center;padding-top:28px}
+.slide-switch{position:absolute;top:9px;left:9px;z-index:5;background:#e87722;color:#fff;font-size:10px;font-weight:600;border:none;padding:5px 11px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:3px}
+.slide-logo{position:absolute;bottom:28px;left:10px;z-index:4;background:#ff6b00;color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:3px;letter-spacing:-.3px}
+.slide-ver{position:absolute;bottom:30px;right:10px;z-index:4;font-size:8px;color:rgba(255,255,255,.25)}
+.slide-heading{background:linear-gradient(140deg,#2e7d32,#43a047);border-radius:18px;padding:10px 28px;color:#fff;font-size:20px;font-weight:900;display:inline-block;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.slide-cards{display:flex;gap:10px;justify-content:center}
+.scard{background:#fff;border-radius:12px;flex:1;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.scard-head{background:#2e7d32;color:#fff;padding:6px 8px;font-size:10px;font-weight:700;text-align:center}
+.scard-head small{font-size:9px;font-weight:400;opacity:.8}
+.scard-body{padding:8px 10px;font-size:10px;color:#333;line-height:1.7;text-align:left}
+.scard-body b{color:#2e7d32}
+
+/* page dots + nav */
+.page-nav-row{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:5}
+.pnav{background:rgba(255,255,255,.18);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.pnav:hover{background:rgba(255,255,255,.35)}
+.pdots{display:flex;gap:4px}
+.pdot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:.2s}
+.pdot.active{background:#fff;width:16px;border-radius:3px}
+
+/* video bar */
+.vidbar{height:32px;background:#0d0d0d;display:flex;align-items:center;gap:8px;padding:0 10px;flex-shrink:0;border-top:1px solid #1a1a1a}
+.vb-play{background:none;border:none;color:#ccc;font-size:14px;cursor:pointer;padding:0}
+.vb-tc{font-size:10px;color:#888;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vb-track{flex:1;height:3px;background:#333;border-radius:2px;cursor:pointer}
+.vb-fill{height:100%;background:#e87722;border-radius:2px;width:0%;transition:width .4s}
+.vb-speed{background:#282828;color:#888;font-size:9px;padding:2px 7px;border-radius:3px;border:none;cursor:pointer}
+
+/* ── PACING TOAST — sits inside slide-col ── */
+.pacing-toast{
+  position:absolute;
+  bottom:44px; right:12px;
+  width:300px; z-index:50;
+  border-radius:10px; padding:13px 14px 16px;
+  display:flex; gap:10px; align-items:flex-start;
+  opacity:0; pointer-events:none;
+  transform:translateY(16px);
+  transition:opacity .38s, transform .42s cubic-bezier(.34,1.4,.64,1);
+}
+.pacing-toast.show{
+  opacity:1; pointer-events:all;
+  transform:translateY(0);
+}
+.pacing-toast.dismiss{
+  opacity:0; transform:translateY(14px);
+  transition:opacity .22s ease-in, transform .22s ease-in;
+}
+.pacing-toast.t-prog{background:rgba(20,50,100,.95);border:1px solid rgba(59,130,246,.55);box-shadow:0 6px 28px rgba(59,130,246,.25)}
+.pacing-toast.t-skip{background:rgba(55,30,5,.95);border:1px solid rgba(245,158,11,.55);box-shadow:0 6px 28px rgba(245,158,11,.2)}
+.pacing-toast.t-stay{background:rgba(55,10,10,.95);border:1px solid rgba(239,68,68,.55);box-shadow:0 6px 28px rgba(239,68,68,.2)}
+.pt-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+.t-prog .pt-icon{color:#60a5fa} .t-skip .pt-icon{color:#fbbf24} .t-stay .pt-icon{color:#f87171}
+.pt-body{flex:1}
+.pt-title{font-size:12px;font-weight:700;margin-bottom:4px}
+.t-prog .pt-title{color:#93c5fd} .t-skip .pt-title{color:#fde68a} .t-stay .pt-title{color:#fca5a5}
+.pt-msg{font-size:11px;color:rgba(255,255,255,.75);line-height:1.45}
+.pt-close{background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:16px;flex-shrink:0;padding:0;transition:.15s;line-height:1}
+.pt-close:hover{color:rgba(255,255,255,.8)}
+.pt-bar{position:absolute;bottom:0;left:0;height:3px;border-radius:0 0 0 10px}
+.t-prog .pt-bar{background:rgba(96,165,250,.6)} .t-skip .pt-bar{background:rgba(251,191,36,.6)} .t-stay .pt-bar{background:rgba(248,113,113,.6)}
+@keyframes ptbar{from{width:100%}to{width:0}}
+
+/* bot-mid: video tiles */
+.video-col{border-left:1px solid #555;border-right:1px solid #555;display:flex;flex-direction:column;background:#111}
+.vtile{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.vtile:first-child{border-bottom:2px solid #333;background:#1c1a3a}
+.vtile:last-child{background:#0e1a0e}
+.vtile-label{position:absolute;bottom:6px;left:8px;font-size:10px;color:rgba(255,255,255,.6);background:rgba(0,0,0,.5);padding:1px 7px;border-radius:3px}
+
+/* bot-right: chat */
+.chat-col{background:#fff;border-left:1px solid #ddd;display:flex;flex-direction:column;overflow:hidden}
+.chat-body{flex:1;overflow-y:auto;padding:10px}
+.chat-ts{text-align:center;margin:6px auto 5px;font-size:9px;color:#bbb;background:#f3f3f3;padding:1px 8px;border-radius:10px;display:block}
+.chat-msg{font-size:10px;color:#555;line-height:1.5;padding:5px 0 5px;border-bottom:1px solid #f5f5f5}
+.chat-msg.log-prog{border-left:2px solid #3b82f6;padding-left:7px;color:#1e3a5f;background:#f0f6ff}
+.chat-msg.log-skip{border-left:2px solid #f59e0b;padding-left:7px;color:#78350f;background:#fffbeb}
+.chat-msg.log-stay{border-left:2px solid #ef4444;padding-left:7px;color:#7f1d1d;background:#fff5f5}
+
+/* ── DEMO BAR ── */
+.demo-bar{background:#1a1a1a;border-top:1px solid #2e2e2e;display:flex;align-items:center;flex-shrink:0}
+.demo-label{font-size:10px;color:#555;padding:0 10px;white-space:nowrap;flex-shrink:0;border-right:1px solid #2e2e2e}
+.dbtn{flex:1;background:none;border:none;border-right:1px solid #2a2a2a;color:#888;font-size:10px;padding:7px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:.12s;line-height:1.3}
+.dbtn:last-child{border-right:none}
+.dbtn:hover:not(.used){background:#242424;color:#ddd}
+.dbtn.used{opacity:.25;pointer-events:none}
+.dbtn.active-btn{background:#1e2e1e;color:#fff;border-bottom:2px solid currentColor}
+.dbtn.active-btn.t-prog-btn{color:#60a5fa;border-bottom-color:#60a5fa}
+.dbtn i{font-size:15px}
+.dbadge{font-size:9px;background:#252525;color:#666;padding:1px 7px;border-radius:8px}
+.dbadge.warn{background:#7c2d12;color:#fde68a}
+
+/* slide flip */
+@keyframes flip{from{opacity:.45;transform:scale(.97) translateY(6px)}to{opacity:1;transform:none}}
+.flipping{animation:flip .22s ease-out}
+</style>
+</head>
+<body>
+<div class="win">
+
+  <!-- ── TITLE BAR ── -->
+  <div class="titlebar">
+    <div class="traffic">
+      <div class="tdot" style="background:#ff5f57"></div>
+      <div class="tdot" style="background:#febc2e"></div>
+      <div class="tdot" style="background:#28c840"></div>
+    </div>
+    <div class="win-title">NMC-L1-U10-LC1-2: Lesson 2 Activities</div>
+    <div class="win-icons"><i class="ti ti-zoom-in"></i><i class="ti ti-layout-sidebar"></i></div>
+  </div>
+
+  <!-- ── TOP ROW ── -->
+  <div class="top-row">
+
+    <!-- top-left -->
+    <div class="tl-panel">
+      <div class="class-done">Class is finished</div>
+      <div class="stars" id="stars">
+        <span class="star" onclick="rateStar(1)">★</span>
+        <span class="star" onclick="rateStar(2)">★</span>
+        <span class="star" onclick="rateStar(3)">★</span>
+        <span class="star" onclick="rateStar(4)">★</span>
+        <span class="star" onclick="rateStar(5)">★</span>
+      </div>
+    </div>
+
+    <!-- top-mid -->
+    <div class="tm-panel">
+      <div class="info-tabs">
+        <div class="itab" onclick="switchTab(0,this)">Class Info</div>
+        <div class="itab active" onclick="switchTab(1,this)">Student Info</div>
+      </div>
+      <div class="info-body">
+        <div class="ifield"><div class="ifl">Name</div><div class="ifv">Brent</div></div>
+        <div class="ifield"><div class="ifl">Computer Placement Test Result</div><div class="ifv">No Computer Test result.</div></div>
+        <div class="ifield"><div class="ifl">Student's Character Traits</div><div class="ifv">not available</div></div>
+        <div class="ifield">
+          <div class="ifl">Teachers' Recent Comments</div>
+          <div class="ifv" style="color:#bbb;margin-bottom:2px">1.29 Jan, 2026 | EIF-L1-U1-LC1-9 <span class="written-badge">Written by you</span></div>
+          <div class="ifv">dddd</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- top-right -->
+    <div class="tr-panel">
+      <div class="action-btn">
+        <div class="ab-icon ic-o"><i class="ti ti-message-plus" style="color:#e87722"></i></div>
+        <div class="ab-label">Add Feedback</div>
+      </div>
+      <div class="action-btn">
+        <div class="ab-icon ic-r"><i class="ti ti-bulb" style="color:#e05555"></i></div>
+        <div class="ab-label">Advice</div>
+      </div>
+      <div class="action-btn">
+        <div class="ab-icon ic-g"><i class="ti ti-door-exit" style="color:#999"></i></div>
+        <div class="ab-label">Exit</div>
+      </div>
+      <div class="action-btn">
+        <div class="ab-icon ic-g"><i class="ti ti-refresh" style="color:#999"></i></div>
+        <div class="ab-label">Refresh</div>
+      </div>
+      <div class="action-btn">
+        <div class="ab-icon ic-b"><i class="ti ti-wifi" style="color:#3b82f6"></i></div>
+        <div class="ab-label">Line</div>
+      </div>
+      <div class="action-btn">
+        <div class="ab-icon ic-g"><i class="ti ti-shield" style="color:#999"></i></div>
+        <div class="ab-label">Contact Fireman</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BOTTOM ROW ── -->
+  <div class="bot-row">
+
+    <!-- bot-left: slide -->
+    <div class="slide-col">
+      <div class="slide-frame" id="slideFrame">
+        <div class="trees" aria-hidden="true">
+          <div class="tree" style="width:38px;height:56px;margin-right:-8px"></div>
+          <div class="tree" style="width:52px;height:74px;margin-right:-12px"></div>
+          <div class="tree" style="width:44px;height:62px"></div>
+          <div class="tree" style="width:58px;height:82px;margin-left:18px;margin-right:-14px"></div>
+          <div class="tree" style="width:40px;height:55px"></div>
+          <div class="tree" style="width:48px;height:68px;margin-left:24px"></div>
+        </div>
+
+        <button class="slide-switch"><i class="ti ti-chevron-left" style="font-size:10px"></i> Switch to class slides</button>
+        <div class="slide-logo">vip KID</div>
+        <div class="slide-ver">v2-1773328977776612120</div>
+
+        <div class="slide-inner">
+          <div class="slide-heading" id="slideHeading">Learning Content 学习内容</div>
+          <div class="slide-cards" id="slideCards"></div>
+        </div>
+
+        <!-- page nav -->
+        <div class="page-nav-row">
+          <button class="pnav" onclick="changePage(-1)"><i class="ti ti-chevron-left"></i></button>
+          <div class="pdots" id="pdots"></div>
+          <button class="pnav" onclick="changePage(1)"><i class="ti ti-chevron-right"></i></button>
+        </div>
+
+        <!-- PACING TOAST -->
+        <div class="pacing-toast t-prog" id="toast" role="alert" aria-live="assertive">
+          <i class="pt-icon" id="tIcon"></i>
+          <div class="pt-body">
+            <div class="pt-title" id="tTitle"></div>
+            <div class="pt-msg" id="tMsg"></div>
+          </div>
+          <button class="pt-close" onclick="dismissToast()" aria-label="Close"><i class="ti ti-x"></i></button>
+          <div class="pt-bar" id="tBar"></div>
+        </div>
+      </div>
+
+      <div class="vidbar">
+        <button class="vb-play" id="playBtn" onclick="togglePlay()"><i class="ti ti-player-play" id="playIcon"></i></button>
+        <span class="vb-tc" id="vidTime">00:00</span>
+        <div class="vb-track" onclick="scrub(event)"><div class="vb-fill" id="vidFill"></div></div>
+        <span class="vb-tc">01:30</span>
+        <button class="vb-speed">Speed</button>
+      </div>
+    </div>
+
+    <!-- bot-mid: video tiles (separate column, matching screenshot) -->
+    <div class="video-col">
+      <div class="vtile">
+        <!-- student: cheerful chick avatar -->
+        <svg width="110" height="110" viewBox="0 0 110 110" aria-label="Student - animated avatar">
+          <defs>
+            <radialGradient id="bg1" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#3a3080"/>
+              <stop offset="100%" stop-color="#1c1a3a"/>
+            </radialGradient>
+          </defs>
+          <circle cx="55" cy="55" r="55" fill="url(#bg1)"/>
+          <ellipse cx="55" cy="68" rx="30" ry="22" fill="#cc7700"/>
+          <circle cx="55" cy="44" r="22" fill="#ffc34d"/>
+          <circle cx="55" cy="44" r="20" fill="#ffce63"/>
+          <!-- headphones band -->
+          <path d="M33 42 Q33 22 55 22 Q77 22 77 42" stroke="#888" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <rect x="29" y="38" width="9" height="14" rx="4" fill="#aaa"/>
+          <rect x="72" y="38" width="9" height="14" rx="4" fill="#aaa"/>
+          <circle cx="48" cy="43" r="2.5" fill="#5a3a0a"/>
+          <circle cx="62" cy="43" r="2.5" fill="#5a3a0a"/>
+          <path d="M47 51 Q55 57 63 51" stroke="#c8860a" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- kit badge -->
+          <rect x="62" y="54" width="16" height="10" rx="3" fill="#e87722"/>
+          <text x="70" y="62" text-anchor="middle" font-size="6" fill="#fff" font-weight="bold">KIT</text>
+        </svg>
+        <div class="vtile-label">Student</div>
+      </div>
+      <div class="vtile">
+        <!-- teacher: realistic photo feel -->
+        <svg width="110" height="110" viewBox="0 0 110 110" aria-label="Teacher - camera feed">
+          <defs>
+            <radialGradient id="bg2" cx="50%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#2a3a28"/>
+              <stop offset="100%" stop-color="#0e1a0e"/>
+            </radialGradient>
+          </defs>
+          <rect width="110" height="110" fill="url(#bg2)"/>
+          <!-- ceiling pipes (background detail) -->
+          <rect x="0" y="18" width="110" height="5" fill="#1a2a1a" opacity=".6"/>
+          <rect x="0" y="30" width="110" height="3" fill="#1a2a1a" opacity=".4"/>
+          <!-- person silhouette -->
+          <circle cx="55" cy="55" r="18" fill="#c8a882"/>
+          <circle cx="55" cy="55" r="16" fill="#d4b896"/>
+          <circle cx="49" cy="53" r="2.5" fill="#555"/>
+          <circle cx="61" cy="53" r="2.5" fill="#555"/>
+          <path d="M48 61 Q55 66 62 61" stroke="#aaa" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <!-- glasses -->
+          <rect x="43" y="50" width="12" height="8" rx="3" fill="none" stroke="#888" stroke-width="1.2"/>
+          <rect x="57" y="50" width="12" height="8" rx="3" fill="none" stroke="#888" stroke-width="1.2"/>
+          <line x1="55" y1="54" x2="57" y2="54" stroke="#888" stroke-width="1.2"/>
+          <ellipse cx="55" cy="90" rx="28" ry="20" fill="#4a6741"/>
+        </svg>
+        <div class="vtile-label">Teacher</div>
+      </div>
+    </div>
+
+    <!-- bot-right: chat -->
+    <div class="chat-col">
+      <div class="chat-body" id="chatBody">
+        <span class="chat-ts">10:59</span>
+        <div class="chat-msg">Your student is currently taking class via our mobile app. They can receive messages but can not reply to you. App Version: 5.2.0</div>
+        <span class="chat-ts">11:00</span>
+        <div class="chat-msg">Your student is currently taking class via our mobile app. They can receive messages but can not reply to you. App Version: 5.2.0</div>
+        <span class="chat-ts">11:01</span>
+        <div class="chat-msg">Your student is currently taking class via our mobile app. They can receive messages but can not reply to you. App Version: 5.2.0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DEMO BAR ── -->
+  <div class="demo-bar">
+    <div class="demo-label">▶ 点击切换效果</div>
+    <button class="dbtn" id="btnP" onclick="triggerToast('prog')" data-type="prog">
+      <i class="ti ti-clock"></i>Progress reminder
+      <span class="dbadge" id="bP">13 min mark</span>
+    </button>
+    <button class="dbtn" id="btnS" onclick="triggerToast('skip')">
+      <i class="ti ti-player-skip-forward"></i>Skip 3 pages
+      <span class="dbadge" id="bS">fast flip</span>
+    </button>
+    <button class="dbtn" id="btnT" onclick="triggerToast('stay')">
+      <i class="ti ti-hourglass"></i>Stay 5+ min
+      <span class="dbadge" id="bT">same page</span>
+    </button>
+    <button class="dbtn" onclick="resetDemo()">
+      <i class="ti ti-refresh"></i>Reset
+    </button>
+  </div>
+
+</div><!-- /win -->
+
+<script>
+/* ── slides data ── */
+const SLIDES = [
+  {h:'Welcome! Let\'s Start 开始上课',cards:[{t:'Class Rules',s:'课堂规则',b:'• Be respectful<br>• Have fun!'},{t:'Today\'s Goal',s:'今日目标',b:'• Letter sounds<br>• HFW words'},{t:'Materials',s:'准备',b:'• Pen & paper<br>• Good attitude!'}]},
+  {h:'Warm Up 热身活动',cards:[{t:'Alphabet Song',s:'字母歌',b:'• Sing along!<br>• A B C...'},{t:'Body Warm-up',s:'热身',b:'• Clap hands<br>• Jump up!'},{t:'Review',s:'复习',b:'• Last lesson<br>• Key words'}]},
+  {h:'Learning Content 学习内容',cards:[{t:'Letter Sounds',s:'字母发音',b:'• Letter sound <b>m</b><br>• Letter sound <b>n</b>'},{t:'Letter Sound Words',s:'字母音单词',b:'• <b>m</b>an 男人<br>• <b>n</b>eck 脖子'},{t:'HFW',s:'高频词',b:'• what<br>• does'}]},
+  {h:'Practice Time 练习时间',cards:[{t:'Listen & Repeat',s:'听说练习',b:'• man, man, man<br>• neck, neck...'},{t:'Point & Say',s:'指读练习',b:'• Point to m<br>• Say the word'},{t:'Quiz',s:'小测验',b:'• What is this?<br>• Spell it out'}]},
+  {h:'Story Time 故事时间',cards:[{t:'The Story',s:'故事',b:'• Mike the monkey<br>• Lives in a tree'},{t:'Characters',s:'人物',b:'• Mike 猴子<br>• Nora 小鸟'},{t:'Questions',s:'问题',b:'• Where is Mike?<br>• What does he do?'}]},
+  {h:'Activity 互动活动',cards:[{t:'Draw & Label',s:'画画标注',b:'• Draw a monkey<br>• Write "m" word'},{t:'Spell It',s:'拼写',b:'• m-a-n<br>• n-e-c-k'},{t:'Make a Sentence',s:'造句',b:'• I see a man.<br>• He has a neck.'}]},
+  {h:'Review & Wrap Up 复习总结',cards:[{t:'What We Learned',s:'今日所学',b:'• Letters m & n<br>• HFW: what, does'},{t:'Great Work!',s:'表现很棒',b:'• You did awesome!<br>• Give 5 stars'},{t:'Homework',s:'家庭作业',b:'• Practice m words<br>• Read the story'}]},
+  {h:'Goodbye! 再见',cards:[{t:'See You Next Time',s:'下次见',b:'• Great class today!<br>• Keep practicing'},{t:'Stars Earned',s:'获得星星',b:'• ★★★★★<br>• Excellent work!'},{t:'',s:'',b:''}]},
+];
+const TOTAL=SLIDES.length;
+let curPage=2, reminderCount=0, toastTimer=null;
+const MAX=1; // kept for reference only
+
+function renderSlide(pg,flip){
+  const s=SLIDES[pg];
+  const f=document.getElementById('slideFrame');
+  if(flip){f.classList.remove('flipping');void f.offsetWidth;f.classList.add('flipping');}
+  document.getElementById('slideHeading').textContent=s.h;
+  const cc=document.getElementById('slideCards');
+  cc.innerHTML='';
+  s.cards.forEach(c=>{
+    if(!c.t)return;
+    const d=document.createElement('div');d.className='scard';
+    d.innerHTML=`<div class="scard-head">${c.t}${c.s?' <small>'+c.s+'</small>':''}</div><div class="scard-body">${c.b}</div>`;
+    cc.appendChild(d);
+  });
+  renderDots(pg);
+}
+function renderDots(pg){
+  const d=document.getElementById('pdots');d.innerHTML='';
+  for(let i=0;i<TOTAL;i++){
+    const s=document.createElement('span');
+    s.className='pdot'+(i===pg?' active':'');
+    s.onclick=(j=>()=>goPage(j))(i);
+    d.appendChild(s);
+  }
+}
+function goPage(pg){if(pg===curPage||pg<0||pg>=TOTAL)return;curPage=pg;renderSlide(curPage,true);}
+function changePage(d){goPage(curPage+d);}
+renderSlide(curPage,false);
+
+/* star rating */
+function rateStar(n){document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('lit',i<n));}
+
+/* tab */
+function switchTab(idx,el){
+  document.querySelectorAll('.itab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* video timer */
+let vid=0,playing=false,vidInt=null;
+function togglePlay(){
+  playing=!playing;
+  document.getElementById('playIcon').className=playing?'ti ti-player-pause':'ti ti-player-play';
+  if(playing){vidInt=setInterval(()=>{vid=Math.min(vid+1,90);updateVid();},1000);}
+  else{clearInterval(vidInt);}
+}
+function updateVid(){
+  const m=Math.floor(vid/60),s=vid%60;
+  document.getElementById('vidTime').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  document.getElementById('vidFill').style.width=(vid/90*100).toFixed(1)+'%';
+}
+function scrub(e){const t=e.currentTarget;vid=Math.round(Math.max(0,Math.min(1,e.offsetX/t.offsetWidth))*90);updateVid();}
+
+/* toast */
+const toast=document.getElementById('toast');
+const tBar=document.getElementById('tBar');
+const CFG={
+  prog:{cls:'t-prog',icon:'ti-clock',title:'Class Progress Reminder',msg:'13/25 minutes in. Please keep pace.',logCls:'log-prog'},
+  skip:{cls:'t-skip',icon:'ti-player-skip-forward',title:'Page Skip Detected',msg:'You skipped 3 pages. Just be careful of your teaching pace.',logCls:'log-skip'},
+  stay:{cls:'t-stay',icon:'ti-hourglass-high',title:'Long Stay Detected',msg:'5+ minutes on the same page. Please check your teaching progress.',logCls:'log-stay'},
+};
+
+/* ── sound ── */
+function playChime(type){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const freqs={prog:[880,1100],skip:[660,830],stay:[440,554]};
+    const pair=freqs[type]||freqs.prog;
+    pair.forEach((freq,i)=>{
+      const o=ctx.createOscillator();
+      const g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.type='sine'; o.frequency.value=freq;
+      const t=ctx.currentTime+i*0.18;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.18,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.45);
+      o.start(t); o.stop(t+0.5);
+    });
+  }catch(e){}
+}
+
+let activeType=null;
+
+function triggerToast(type){
+  playChime(type);
+  const c=CFG[type];
+  // if same type already showing, just replay
+  // swap content immediately, re-animate bar
+  activeType=type;
+  toast.className='pacing-toast '+c.cls;
+  document.getElementById('tIcon').className='ti '+c.icon+' pt-icon';
+  document.getElementById('tTitle').textContent=c.title;
+  document.getElementById('tMsg').textContent=c.msg;
+  tBar.style.animation='none';void tBar.offsetWidth;tBar.style.animation='ptbar 5s linear forwards';
+  // if already visible just swap; otherwise animate in
+  if(!toast.classList.contains('show')){
+    toast.classList.remove('dismiss');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>toast.classList.add('show')));
+  }
+  clearTimeout(toastTimer);toastTimer=setTimeout(dismissToast,5000);
+  addChatLog(c.logCls,'[Pacing] '+c.msg);
+  // highlight active button
+  ['btnP','btnS','btnT'].forEach(id=>document.getElementById(id).classList.remove('active-btn'));
+  const map={prog:'btnP',skip:'btnS',stay:'btnT'};
+  document.getElementById(map[type]).classList.add('active-btn');
+}
+function dismissToast(){
+  clearTimeout(toastTimer);
+  toast.classList.remove('show');toast.classList.add('dismiss');
+  setTimeout(()=>{toast.classList.remove('dismiss');
+    ['btnP','btnS','btnT'].forEach(id=>document.getElementById(id).classList.remove('active-btn'));
+  },350);
+}
+function addChatLog(cls,msg){
+  const box=document.getElementById('chatBody');
+  const now=new Date();
+  const ts=document.createElement('span');ts.className='chat-ts';
+  ts.textContent=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  const m=document.createElement('div');m.className='chat-msg '+cls;m.textContent=msg;
+  box.appendChild(ts);box.appendChild(m);box.scrollTop=box.scrollHeight;
+}
+function resetDemo(){
+  dismissToast();
+  ['btnP','btnS','btnT'].forEach(id=>document.getElementById(id).classList.remove('active-btn'));
+}
+</script>
+</body>
+</html>
