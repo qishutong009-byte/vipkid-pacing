@@ -161,6 +161,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   position:absolute;inset:0;opacity:0;cursor:pointer;
   width:100%;height:100%;
 }
+
+/* Filter bar sizing */
+.filter-bar { padding:12px 16px; border-bottom:1px solid #f0f0f0; background:#fff; }
+.filter-bar .fi, .filter-bar .fs { min-width:0 !important; box-sizing:border-box; }
+
+.bulk-bar{display:none;background:#e6f1fb;border:1px solid #b0c8f0;border-radius:3px;padding:7px 16px;margin-bottom:8px;align-items:center;gap:12px;font-size:12px;color:#0c447c}
+.bulk-bar.show{display:flex}
+.bulk-bar button{background:#1565c0;color:#fff;border:none;border-radius:3px;padding:4px 12px;font-size:12px;cursor:pointer;height:26px}
+.bulk-bar button.red{background:#e24b4a}
+.bulk-bar button:hover{opacity:.85}
+.cb-col{width:36px;text-align:center}
 </style>
 </head>
 <body>
@@ -231,60 +242,90 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <span style="color:#333">Real-time Monitor</span>
       </div>
       <div class="page-card">
-        <div class="filter-bar">
-          <div class="fg">
-            <label>Teacher ID</label>
-            <input class="fi" placeholder="Enter teacher ID" style="min-width:120px">
-          </div>
-          <div class="fg">
-            <label>Business Line</label>
-            <select class="fs" style="min-width:100px">
-              <option value="">All</option><option>MC</option><option>NMC</option><option>EIF</option><option>VIPKID GO</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label>Monitor Type</label>
-            <select class="fs" style="min-width:130px">
-              <option value="">All</option><option>Pacing Monitor</option><option>Behavior Monitor</option><option>Sensitive Content Monitor</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label>Status</label>
-            <select class="fs" style="min-width:110px">
-              <option value="">All</option><option>Pending</option><option>Dispatched</option><option>Completed</option><option>Cancelled</option><option>Failed</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label>Monitor Period</label>
-            <div class="date-range">
-              <div class="date-wrap">
-              <span class="date-display placeholder">MM / DD / YYYY</span>
-              <i class="ti ti-calendar cal-icon" aria-hidden="true"></i>
-              <input class="date-input-hidden" type="date">
+        <div class="filter-bar" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <!-- Row 1 -->
+          <div style="display:flex;gap:10px;align-items:flex-end">
+            <div class="fg">
+              <label>Teacher ID</label>
+              <input class="fi" style="width:190px" placeholder="Enter teacher ID">
             </div>
-              <span>to</span>
-              <div class="date-wrap">
-              <span class="date-display placeholder">MM / DD / YYYY</span>
-              <i class="ti ti-calendar cal-icon" aria-hidden="true"></i>
-              <input class="date-input-hidden" type="date">
+            <div class="fg">
+              <label>Task Name</label>
+              <input class="fi" style="width:190px" placeholder="Search task name" list="taskNameList">
+              <datalist id="taskNameList">
+                <option value="新老师监控任务">
+                <option value="G-New重点教师监控">
+                <option value="Korean试听质量抽查">
+                <option value="VIPEnglish月度质检">
+                <option value="优质教师复核">
+              </datalist>
             </div>
+            <div class="fg">
+              <label>Course Type</label>
+              <select class="fs" style="width:190px">
+                <option value="">All</option><option>Trial</option><option>Regular</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Business Line</label>
+              <select class="fs" style="width:190px">
+                <option value="">All</option><option>VIPEnglish</option><option>G-New</option><option>Korean</option><option>Tigerscool</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Monitor Type</label>
+              <select class="fs" style="width:190px">
+                <option value="">All</option><option>Pacing Monitor</option><option>Behavior Monitor</option><option>Sensitive Content Monitor</option>
+              </select>
             </div>
           </div>
-          <div style="display:flex;gap:8px;align-items:flex-end">
-            <button class="btn-search"><i class="ti ti-search" style="font-size:12px" aria-hidden="true"></i> Search</button>
-            <button class="btn-reset" onclick="resetFilters()"><i class="ti ti-x" style="font-size:12px" aria-hidden="true"></i> Reset</button>
-            <button class="btn-new" onclick="openNewModal()"><i class="ti ti-plus" style="font-size:12px" aria-hidden="true"></i> New Task</button>
+          <!-- Row 2 -->
+          <div style="display:flex;gap:10px;align-items:flex-end">
+            <div class="fg">
+              <label>Status</label>
+              <select class="fs" style="width:190px">
+                <option value="">All</option><option>Pending</option><option>Dispatched</option><option>Completed</option><option>Cancelled</option><option>Failed</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Monitor Period (from)</label>
+              <div class="date-wrap" style="width:190px;height:30px">
+                <span class="date-display placeholder" style="width:100%">MM / DD / YYYY</span>
+                <i class="ti ti-calendar cal-icon" aria-hidden="true"></i>
+                <input class="date-input-hidden" type="date">
+              </div>
+            </div>
+            <div class="fg">
+              <label>Monitor Period (to)</label>
+              <div class="date-wrap" style="width:190px;height:30px">
+                <span class="date-display placeholder" style="width:100%">MM / DD / YYYY</span>
+                <i class="ti ti-calendar cal-icon" aria-hidden="true"></i>
+                <input class="date-input-hidden" type="date">
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:8px">
+              <button class="btn-search"><i class="ti ti-search" style="font-size:12px" aria-hidden="true"></i> Search</button>
+              <button class="btn-reset" onclick="resetFilters()"><i class="ti ti-x" style="font-size:12px" aria-hidden="true"></i> Reset</button>
+              <button class="btn-new" onclick="openNewModal()"><i class="ti ti-plus" style="font-size:12px" aria-hidden="true"></i> New Task</button>
+            </div>
           </div>
+        </div>        </div>
+        <div class="bulk-bar" id="bulkBar">
+          <span id="bulkCount">0 items selected</span>
+          <button class="red" onclick="bulkCancel()"><i class="ti ti-ban" style="font-size:12px"></i> Cancel Selected</button>
+          <button style="background:#fff;color:#555;border:1px solid #d9d9d9" onclick="clearSelection()">Clear</button>
         </div>
         <div class="tbl-wrap">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Teacher ID</th>
+                <th class="cb-col"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                <th>TID</th>
+                <th>Task Name</th>
+                <th>Course Type</th>
                 <th>Business Line</th>
                 <th>Monitor Type</th>
                 <th>Monitor Period</th>
-                <th>Sessions</th>
                 <th>Status</th>
                 <th>Created By / Time</th>
                 <th>Action</th>
@@ -319,40 +360,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="detail-card">
         <div class="det-header">
           <div class="det-title">
-            <span id="detailId"></span>
+            <span id="detailName" style="font-size:15px;font-weight:600;color:#222"></span>
+            <span id="detailId" style="font-size:12px;color:#aaa;font-weight:400"></span>
             <span class="sb" id="detailStatus"></span>
           </div>
           <button class="btn-back" onclick="goPage('list')">
             <i class="ti ti-arrow-left" style="font-size:13px" aria-hidden="true"></i> Back to List
           </button>
         </div>
-        <div class="dsec">
-          <div class="dsec-title"><i class="ti ti-file-description" style="font-size:14px" aria-hidden="true"></i> Task Dispatch Detail</div>
-          <div class="dgrid" id="detailMeta"></div>
-        </div>
-        <div class="dsec">
-          <div class="dsec-title"><i class="ti ti-circle-check" style="font-size:14px" aria-hidden="true"></i> Dispatch Status</div>
-          <div class="dgrid dgrid2" id="detailDispatch"></div>
-        </div>
+
+        <!-- Block 1: Task basic info — all config fields, single row -->
+        <div style="display:flex;gap:32px;flex-wrap:wrap;padding:0 0 16px;margin-bottom:18px;border-bottom:1px solid #f0f0f0" id="detailMeta"></div>
+
+        <!-- Block 2: Session monitor records table -->
         <div class="dsec">
           <div class="dsec-title">
-            <i class="ti ti-alert-triangle" style="font-size:14px" aria-hidden="true"></i>
-            Anomaly Records
-            <span style="font-size:11px;color:#aaa;font-weight:400;margin-left:4px">(includes both alerted and limit-exceeded unalerted events)</span>
+            <i class="ti ti-list-details" style="font-size:14px" aria-hidden="true"></i>
+            Session Monitor Records
+            
           </div>
-          <table class="ev-table">
+          <table class="ev-table" style="table-layout:fixed;width:100%">
             <thead>
               <tr>
-                <th>Event Type</th>
-                <th>Trigger Time</th>
-                <th>Detail</th>
-                <th>Alert Sent</th>
+                <th style="width:150px">Lesson SN</th>
+                <th style="width:130px">Start Time</th>
+                <th style="width:55px">Duration</th>
+                <th style="width:90px">Dispatch Status</th>
+                <th style="width:170px">Event Type</th>
+                <th style="width:80px">Trigger Time</th>
+                <th style="width:80px">Alert Sent</th>
                 <th>Reason (if not sent)</th>
               </tr>
             </thead>
-            <tbody id="eventTbody"></tbody>
+            <tbody id="sessionTbody"></tbody>
           </table>
-          <div class="ev-note">Note: reminder_sent = false records were triggered but not pushed due to reaching the reminder limit. All records are retained for operational review.</div>
+
         </div>
       </div>
     </div>
@@ -371,12 +413,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="form-row">
         <div class="ff">
           <label>Teacher ID <span class="req">*</span></label>
-          <input placeholder="Enter teacher ID(s), separate by comma or line break">
-          
+          <input placeholder="Separate by line break or comma">
+          <div class="ff-hint" style="display:flex;align-items:center;justify-content:flex-end;margin-top:4px">
+            <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;color:#1565c0;font-size:11px;font-weight:500;white-space:nowrap">
+              <i class="ti ti-upload" style="font-size:13px" aria-hidden="true"></i>
+              Upload Excel
+              <input type="file" accept=".xlsx,.xls" style="display:none" onchange="handleExcelUpload(this)">
+            </label>
+          </div>
         </div>
+        <div class="ff">
+          <label>Task Name</label>
+          <input id="taskNameInput" placeholder="">
+        </div>
+      </div>
+      <div class="form-row">
         <div class="ff">
           <label>Course Type <span class="req">*</span></label>
           <select><option value="">Please select</option><option>Trial</option><option>Regular</option></select>
+        </div>
+        <div class="ff">
+          <label>Business Line <span class="req">*</span></label>
+          <select><option value="">Please select (multi-select supported)</option><option>VIPEnglish</option><option>G-New</option><option>Korean</option><option>Tigerscool</option></select>
+          
         </div>
       </div>
       <div class="form-row">
@@ -395,12 +454,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
               <input class="date-input-hidden" type="date">
             </div>
           </div>
-          
-        </div>
-        <div class="ff">
-          <label>Business Line <span class="req">*</span></label>
-          <select><option value="">Please select (multi-select supported)</option><option>MC</option><option>NMC</option><option>EIF</option><option>VIPKID GO</option></select>
-          
         </div>
       </div>
       <div class="form-row">
@@ -413,7 +466,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           
         </div>
         <div class="ff">
-          <label>Lesson Name</label>
+          <label>Lesson SN</label>
           <input placeholder="">
         </div>
       </div>
@@ -425,7 +478,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
             <label class="cb-item off"><input type="checkbox" disabled> Behavior Monitor</label>
             <label class="cb-item off"><input type="checkbox" disabled> Sensitive Content Monitor</label>
           </div>
-          
+          <div style="font-size:11px;color:#854f0b;background:#fff7e6;padding:3px 8px;border-radius:3px;margin-top:6px"></div>
         </div>
       </div>
     </div>
@@ -476,27 +529,45 @@ const STATUS_CLS={Pending:'s-pending',Dispatched:'s-dispatched',Completed:'s-com
 let cancelTarget=null;
 
 const TASKS=[
-  {id:'TK-2025-001',tid:'T001234',bl:'MC',type:'Pacing Monitor',period:'2025-05-01 ~ 05-31',n:2,status:'Completed',creator:'wangzhanlian',ctime:'2025-05-01 09:12',
-   meta:[['Teacher ID','T001234'],['Course Type','Regular'],['Lesson ID','LC-20250512-8841'],['Lesson Name','NMC-L1-U10-LC1-2'],['Business Line','MC'],['Monitor Type','Pacing Monitor'],['Class Start Time','2025-05-12 10:00'],['Dispatch Time','2025-05-12 09:58'],['Duration','25 min']],
-   dispatch:[['Dispatch Status','<span class="sb s-completed">Success</span>'],['Failure / Cancel Reason','<span style="color:#aaa">—</span>']],
-   events:[['Progress Reminder','10:13:04','13-minute mark triggered','<span class="tag-y">Sent</span>','<span style="color:#aaa">—</span>'],
-           ['Page Skip (skip_page)','10:18:32','4 pages skipped within 8s','<span class="tag-n">Not Sent</span>','Reminder limit reached (25-min class ≤ 1 alert)']]},
-  {id:'TK-2025-002',tid:'T002891',bl:'NMC',type:'Pacing Monitor',period:'2025-05-10 ~ 06-10',n:1,status:'Dispatched',creator:'wangzhanlian',ctime:'2025-05-10 14:20',meta:[],dispatch:[],events:[]},
-  {id:'TK-2025-003',tid:'T003457',bl:'EIF',type:'Pacing Monitor',period:'2025-04-15 ~ 05-15',n:1,status:'Pending',creator:'wangzhanlian',ctime:'2025-04-15 10:00',meta:[],dispatch:[],events:[]},
-  {id:'TK-2025-004',tid:'T004120',bl:'MC',type:'Pacing Monitor',period:'2025-05-01 ~ 05-31',n:2,status:'Cancelled',creator:'chenchunnuan',ctime:'2025-05-01 11:30',
-   meta:[['Teacher ID','T004120'],['Course Type','Trial'],['Lesson ID','—'],['Business Line','MC'],['Monitor Type','Pacing Monitor'],['Dispatch Time','2025-05-01 11:32']],
-   dispatch:[['Dispatch Status','<span class="sb s-cancelled">Cancelled</span>'],['Failure / Cancel Reason','First session status was TC (Teacher Cancel). Task auto-cancelled.']],
-   events:[]},
-  {id:'TK-2025-005',tid:'T005832',bl:'NMC',type:'Pacing Monitor',period:'2025-05-20 ~ 06-20',n:3,status:'Completed',creator:'zhangfeipeng',ctime:'2025-05-20 08:45',
-   meta:[['Teacher ID','T005832'],['Course Type','Regular'],['Lesson ID','LC-20250522-3314'],['Lesson Name','EIF-L1-U1-LC1-9'],['Business Line','NMC'],['Monitor Type','Pacing Monitor'],['Class Start Time','2025-05-22 09:00'],['Dispatch Time','2025-05-22 08:58'],['Duration','50 min']],
-   dispatch:[['Dispatch Status','<span class="sb s-completed">Success</span>'],['Failure / Cancel Reason','<span style="color:#aaa">—</span>']],
-   events:[['Progress Reminder','09:15:02','15-minute mark triggered','<span class="tag-y">Sent</span>','<span style="color:#aaa">—</span>'],
-           ['Long Stay (long_stay)','09:24:18','Stayed on same page for 6m 12s','<span class="tag-y">Sent</span>','<span style="color:#aaa">—</span>'],
-           ['Progress Reminder','09:35:05','35-minute mark triggered','<span class="tag-n">Not Sent</span>','Reminder limit reached (50-min class ≤ 2 alerts)']]},
-  {id:'TK-2025-006',tid:'T006241',bl:'EIF',type:'Pacing Monitor',period:'2025-06-01 ~ 06-30',n:1,status:'Failed',creator:'chenchunnuan',ctime:'2025-06-01 09:00',
-   meta:[['Teacher ID','T006241'],['Course Type','Regular'],['Business Line','EIF'],['Monitor Type','Pacing Monitor'],['Dispatch Time','2025-06-01 09:01']],
-   dispatch:[['Dispatch Status','<span class="sb s-failed">Failed</span>'],['Failure / Cancel Reason','Dispatch failed: course system API timeout. Please contact tech support and retry.']],
-   events:[]},
+  {id:'TK-2025-001',courseType:'Regular',taskName:'新老师监控任务',tid:'T001234',bl:'VIPEnglish',type:'Pacing Monitor',period:'2025-05-01 ~ 05-31',n:2,status:'Completed',creator:'wangzhanlian',ctime:'2025-05-01 09:12',
+   meta:[['Course Type','Regular'],['Sampling Rate','1%']],
+   sessions:[
+     {lesson:'NMC-L1-U10-LC1-2',start:'2025-05-12 10:00',dur:'25min',dstatus:'Success',
+      events:[['Progress Reminder','10:13:04','<span class="tag-y">Sent</span>','—'],
+              ['Page Skip (skip_page)','10:18:32','<span class="tag-n">Not Sent</span>','Reminder limit reached (25-min ≤ 1)']]},
+     {lesson:'NMC-L1-U10-LC1-5',start:'2025-05-19 10:00',dur:'25min',dstatus:'Success',
+      events:[['Progress Reminder','10:13:11','<span class="tag-y">Sent</span>','—']]}
+   ]},
+  {id:'TK-2025-002',courseType:'Regular',taskName:'NMC重点教师监控',tid:'T002891',bl:'G-New',type:'Pacing Monitor',period:'2025-05-10 ~ 06-10',n:1,status:'Dispatched',creator:'wangzhanlian',ctime:'2025-05-10 14:20',
+   meta:[['Course Type','Regular'],['Sampling Rate','1%']],
+   sessions:[
+     {lesson:'EIF-L2-U3-LC1-1',start:'2025-05-28 09:00',dur:'50min',dstatus:'Dispatched',events:[]}
+   ]},
+  {id:'TK-2025-003',courseType:'Regular',taskName:'EIF试听质量抽查',tid:'T003457',bl:'Korean',type:'Pacing Monitor',period:'2025-04-15 ~ 05-15',n:1,status:'Pending',creator:'wangzhanlian',ctime:'2025-04-15 10:00',
+   meta:[['Course Type','Regular'],['Sampling Rate','1%']],
+   sessions:[]},
+  {id:'TK-2025-004',courseType:'Trial',taskName:'MC月度质检',tid:'T004120',bl:'VIPEnglish',type:'Pacing Monitor',period:'2025-05-01 ~ 05-31',n:2,status:'Cancelled',creator:'chenchunnuan',ctime:'2025-05-01 11:30',
+   meta:[['Course Type','Trial'],['Sampling Rate','1%']],
+   sessions:[
+     {lesson:'MC-L1-U5-LC1-3',start:'2025-05-01 14:00',dur:'25min',dstatus:'Cancelled',events:[],cancelReason:'TC (Teacher Cancel) — task auto-cancelled'}
+   ]},
+  {id:'TK-2025-005',courseType:'Regular',taskName:'优质教师复核',tid:'T005832',bl:'G-New',type:'Pacing Monitor',period:'2025-05-20 ~ 06-20',n:3,status:'Completed',creator:'zhangfeipeng',ctime:'2025-05-20 08:45',
+   meta:[['Course Type','Regular'],['Sampling Rate','2%']],
+   sessions:[
+     {lesson:'EIF-L1-U1-LC1-9',start:'2025-05-22 09:00',dur:'50min',dstatus:'Success',
+      events:[['Progress Reminder','09:15:02','<span class="tag-y">Sent</span>','—'],
+              ['Long Stay (long_stay)','09:24:18','<span class="tag-y">Sent</span>','—'],
+              ['Progress Reminder','09:35:05','<span class="tag-n">Not Sent</span>','Reminder limit reached (50-min ≤ 2)']]},
+     {lesson:'EIF-L1-U1-LC1-12',start:'2025-05-29 10:00',dur:'50min',dstatus:'Success',
+      events:[['Progress Reminder','10:15:03','<span class="tag-y">Sent</span>','—']]},
+     {lesson:'EIF-L1-U2-LC1-1',start:'2025-06-05 09:00',dur:'50min',dstatus:'Success',
+      events:[]}
+   ]},
+  {id:'TK-2025-006',courseType:'Regular',taskName:'-',tid:'T006241',bl:'Korean',type:'Pacing Monitor',period:'2025-06-01 ~ 06-30',n:1,status:'Failed',creator:'chenchunnuan',ctime:'2025-06-01 09:00',
+   meta:[['Course Type','Regular'],['Sampling Rate','1%']],
+   sessions:[
+     {lesson:'—',start:'—',dur:'—',dstatus:'Failed',events:[],cancelReason:'Dispatch failed: course system API timeout. Please contact tech support and retry.'}
+   ]},
 ];
 
 function renderTable(){
@@ -505,15 +576,23 @@ function renderTable(){
   TASKS.forEach(t=>{
     const canView=['Completed','Cancelled','Failed'].includes(t.status);
     const isPending=t.status==='Pending';
-    let ops=`<a class="al${canView?'':' off'}" onclick="${canView?`showDetail('${t.id}')`:''}"">Details</a>`;
+    const isCancelled=t.status==='Cancelled';
+    const isFailed=t.status==='Failed';
+    const canEdit=t.status==='Pending';
+    let ops=`<a class="al${canView?'':' off'}" onclick="${canView?'showDetail(\''+t.id+'\')':''}">Details</a>`;
+    if(canEdit) ops+=`<span class="sep">·</span><a class="al" onclick="openEditModal('${t.id}')">Edit</a>`;
     if(isPending) ops+=`<span class="sep">·</span><a class="al red" onclick="openCancel('${t.id}')">Cancel</a>`;
+    if(isCancelled) ops+=`<span class="sep">·</span><a class="al" onclick="openReCreateModal('${t.id}')">Re-create</a>`;
+    if(isFailed) ops+=`<span class="sep">·</span><a class="al" onclick="openRetryModal('${t.id}')">Retry</a>`;
     const tr=document.createElement('tr');
     tr.innerHTML=`
+      <td class="cb-col">${t.status==='Pending'?`<input type="checkbox" class="row-cb" data-id="${t.id}" onclick="updateBulkBar()">`:''}</td>
       <td>${t.tid}</td>
+      <td>${t.taskName||'—'}</td>
+      <td>${t.courseType||'—'}</td>
       <td>${t.bl}</td>
       <td>${t.type}</td>
       <td style="white-space:nowrap">${t.period}</td>
-      <td style="text-align:center">${t.n}</td>
       <td><span class="sb ${STATUS_CLS[t.status]}">${t.status}</span></td>
       <td style="font-size:11px;color:#888">${t.creator}<br>${t.ctime}</td>
       <td>${ops}</td>`;
@@ -524,20 +603,85 @@ function renderTable(){
 function showDetail(id){
   const t=TASKS.find(x=>x.id===id);
   if(!t) return;
-  document.getElementById('detailId').textContent=t.id;
+  document.getElementById('detailName').textContent=t.taskName&&t.taskName!=='-'?t.taskName:'-';
+  document.getElementById('detailId').textContent='';
   const st=document.getElementById('detailStatus');
   st.className=`sb ${STATUS_CLS[t.status]}`;
   st.textContent=t.status;
   document.getElementById('detailBread').textContent=t.id;
-  document.getElementById('detailMeta').innerHTML=t.meta.map(([l,v])=>`<div class="di"><div class="di-l">${l}</div><div class="di-v">${v}</div></div>`).join('');
-  document.getElementById('detailDispatch').innerHTML=t.dispatch.map(([l,v])=>`<div class="di"><div class="di-l">${l}</div><div class="di-v">${v}</div></div>`).join('');
-  const eb=document.getElementById('eventTbody');
-  eb.innerHTML=t.events.length===0
-    ?`<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px">No anomaly events recorded</td></tr>`
-    :t.events.map(ev=>`<tr>${ev.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+
+  // Block 1: task info — show all config fields (list fields + course type + sampling rate)
+  const fields=[
+    ['Teacher ID', t.tid],
+    ['Business Line', t.bl],
+    ['Monitor Type', t.type],
+    ['Monitor Period', t.period],
+    ['Course Type', t.meta.find(([k])=>k==='Course Type')?.[1]||'—'],
+    ['Sampling Rate', t.meta.find(([k])=>k==='Sampling Rate')?.[1]||'—'],
+    ['Planned Sessions', t.n],
+    ['Monitored Sessions', (()=>{
+      if(!t.sessions||t.sessions.length===0) return '0 / '+t.n;
+      const done=t.sessions.filter(s=>s.dstatus==='Success').length;
+      return done+' / '+t.n;
+    })()],
+    ['Status', `<span class="sb ${STATUS_CLS[t.status]}">${t.status}</span>`],
+  ];
+  document.getElementById('detailMeta').innerHTML=fields.map(([l,v])=>
+    `<div style="display:flex;flex-direction:column;gap:2px;min-width:100px">
+       <div style="font-size:11px;color:#aaa">${l}</div>
+       <div style="font-size:13px;color:#333;font-weight:500">${v}</div>
+     </div>`
+  ).join('');
+
+  // Block 2: session records
+  const sb=document.getElementById('sessionTbody');
+  if(!t.sessions||t.sessions.length===0){
+    sb.innerHTML=`<tr><td colspan="8" style="text-align:center;color:#aaa;padding:20px">No sessions assigned yet</td></tr>`;
+  } else {
+    const dsTag=(s)=>{
+      const map={
+        Success:`<span class="tag-y">Success</span>`,
+        Cancelled:`<span style="color:#5f5e5a;background:#f5f5f5;padding:2px 8px;border-radius:2px;font-size:11px">Cancelled</span>`,
+        Failed:`<span class="tag-n">Failed</span>`,
+        Dispatched:`<span style="color:#0c447c;background:#e6f1fb;padding:2px 8px;border-radius:2px;font-size:11px">Dispatched</span>`,
+        Pending:`<span style="color:#854f0b;background:#fff7e6;padding:2px 8px;border-radius:2px;font-size:11px">Pending</span>`,
+      };
+      return map[s]||s;
+    };
+    let rows='';
+    t.sessions.forEach(s=>{
+      const tag=dsTag(s.dstatus);
+      if(s.dstatus==='Cancelled'||s.dstatus==='Failed'){
+        rows+=`<tr>
+          <td>${s.lesson}</td><td>${s.start}</td><td>${s.dur}</td>
+          <td>${tag}</td>
+          <td style="color:#aaa">—</td><td style="color:#aaa">—</td><td style="color:#aaa">—</td>
+          <td style="color:#854f0b;font-size:11px">${s.cancelReason||'—'}</td>
+        </tr>`;
+      } else if(!s.events||s.events.length===0){
+        rows+=`<tr>
+          <td>${s.lesson}</td><td>${s.start}</td><td>${s.dur}</td>
+          <td>${tag}</td>
+          <td colspan="4" style="text-align:center;color:#aaa;font-size:11px">No anomaly events</td>
+        </tr>`;
+      } else {
+        s.events.forEach((ev,i)=>{
+          rows+=`<tr>
+            ${i===0
+              ?`<td rowspan="${s.events.length}" style="vertical-align:middle">${s.lesson}</td>
+                <td rowspan="${s.events.length}" style="vertical-align:middle">${s.start}</td>
+                <td rowspan="${s.events.length}" style="vertical-align:middle">${s.dur}</td>
+                <td rowspan="${s.events.length}" style="vertical-align:middle">${tag}</td>`
+              :''}
+            <td>${ev[0]}</td><td>${ev[1]}</td><td>${ev[2]}</td><td>${ev[3]}</td>
+          </tr>`;
+        });
+      }
+    });
+    sb.innerHTML=rows;
+  }
   goPage('detail');
 }
-
 function goPage(p){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+p).classList.add('active');
@@ -555,17 +699,25 @@ function openNewModal(){document.getElementById('newModal').classList.add('open'
 function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('open');}
 function updateRateHint(){}
 
+function showCustomToast(msg, duration=4000){
+  const t=document.getElementById('successToast');
+  t.querySelector('span').textContent=msg;
+  t.style.display='flex';
+  clearTimeout(toastTimeout);
+  toastTimeout=setTimeout(()=>{t.style.display='none';},duration);
+}
 let toastTimeout=null;
 function submitTask(){
   closeModal('newModal');
-  showToast();
+  // Simulate: 1 duplicate
+  const hasDuplicate = Math.random() > 0.5;
+  if(hasDuplicate){
+    showCustomToast('Task created. Duplicate detected (1).');
+  } else {
+    showCustomToast('Task created successfully.');
+  }
 }
-function showToast(){
-  const t=document.getElementById('successToast');
-  t.style.display='flex';
-  clearTimeout(toastTimeout);
-  toastTimeout=setTimeout(hideToast,3000);
-}
+function showToast(){ showCustomToast('Task Created', 3000); }
 function hideToast(){
   const t=document.getElementById('successToast');
   t.style.display='none';
@@ -574,7 +726,9 @@ function hideToast(){
 
 function openCancel(id){
   cancelTarget=id;
-  document.getElementById('cancelTaskId').textContent=id;
+  const t=TASKS.find(x=>x.id===id);
+  const displayName=t&&t.taskName&&t.taskName!=='-'?t.taskName:id;
+  document.getElementById('cancelTaskId').textContent=displayName;
   document.getElementById('cancelModal').classList.add('open');
 }
 
@@ -584,6 +738,121 @@ function confirmCancel(){
   renderTable();
 initDateInputs();
   closeModal('cancelModal');
+}
+
+
+let reCreateTarget=null;
+let retryTarget=null;
+let editTarget=null;
+
+function openReCreateModal(id){
+  reCreateTarget=id;
+  const t=TASKS.find(x=>x.id===id);
+  if(t){
+    document.getElementById('rc-tid').value=t.tid;
+  }
+  document.getElementById('reCreateModal').classList.add('open');
+}
+
+function submitReCreate(){
+  closeModal('reCreateModal');
+  setTimeout(()=>showToast(),150);
+}
+
+function openRetryModal(id){
+  retryTarget=id;
+  const t=TASKS.find(x=>x.id===id);
+  const displayName=t&&t.taskName&&t.taskName!=='-'?t.taskName:'-';
+  document.getElementById('retryTaskId').textContent=displayName;
+  document.getElementById('retryModal').classList.add('open');
+}
+
+function confirmRetry(){
+  const t=TASKS.find(x=>x.id===retryTarget);
+  if(t) t.status='Pending';
+  renderTable();
+  closeModal('retryModal');
+  setTimeout(()=>showToast(),150);
+}
+
+function openEditModal(id){
+  editTarget=id;
+  const t=TASKS.find(x=>x.id===id);
+  if(t){
+    document.getElementById('edit-tid').value=t.tid;
+  }
+  document.getElementById('editModal').classList.add('open');
+}
+
+function submitEdit(){
+  closeModal('editModal');
+  setTimeout(()=>showToast(),150);
+}
+
+
+function handleExcelUpload(input){
+  if(!input.files||!input.files[0]) return;
+  // Simulate parsing: random count between 10-50
+  const count = Math.floor(Math.random()*41)+10;
+  showCustomToast('Successfully imported '+count+' TIDs');
+  input.value='';
+}
+
+
+function toggleSelectAll(cb){
+  document.querySelectorAll('.row-cb').forEach(c=>c.checked=cb.checked);
+  updateBulkBar();
+}
+function updateBulkBar(){
+  const checked=document.querySelectorAll('.row-cb:checked');
+  const bar=document.getElementById('bulkBar');
+  if(checked.length>0){
+    bar.classList.add('show');
+    document.getElementById('bulkCount').textContent=checked.length+' item(s) selected';
+  } else {
+    bar.classList.remove('show');
+    const sa=document.getElementById('selectAll');
+    if(sa) sa.checked=false;
+  }
+}
+function clearSelection(){
+  document.querySelectorAll('.row-cb').forEach(c=>c.checked=false);
+  const sa=document.getElementById('selectAll');
+  if(sa) sa.checked=false;
+  document.getElementById('bulkBar').classList.remove('show');
+}
+function bulkCancel(){
+  const ids=[...document.querySelectorAll('.row-cb:checked')].map(c=>c.dataset.id);
+  ids.forEach(id=>{
+    const t=TASKS.find(x=>x.id===id);
+    if(t){
+      t.status='Cancelled';
+      // Update each session dispatch status and set cancel reason
+      if(t.sessions&&t.sessions.length>0){
+        t.sessions.forEach(s=>{
+          if(s.dstatus!=='Completed'){
+            s.dstatus='Cancelled';
+            s.cancelReason='Manually cancelled by operator';
+          }
+        });
+      } else {
+        // No sessions yet — add a placeholder
+        t.sessions=[{
+          lesson:'—',start:'—',dur:'—',
+          dstatus:'Cancelled',events:[],
+          cancelReason:'Manually cancelled by operator'
+        }];
+      }
+      // Update dispatch in detail
+      t.dispatch=[
+        ['Dispatch Status','<span class="sb s-cancelled">Cancelled</span>'],
+        ['Failure / Cancel Reason','Manually cancelled by operator']
+      ];
+    }
+  });
+  renderTable();
+  clearSelection();
+  showCustomToast(ids.length+' task(s) cancelled.');
 }
 
 function resetFilters(){
@@ -620,5 +889,183 @@ document.addEventListener('DOMContentLoaded', initDateInputs);
 renderTable();
 initDateInputs();
 </script>
+
+<!-- RE-CREATE MODAL -->
+<div class="overlay" id="reCreateModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-hd-title"><i class="ti ti-copy" style="font-size:15px" aria-hidden="true"></i> Re-create Task</div>
+      <button class="modal-close" onclick="closeModal('reCreateModal')" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:#854f0b;background:#fff7e6;padding:8px 12px;border-radius:3px;border-left:3px solid #f5a623;margin-bottom:16px">
+        Original task was cancelled. A new task will be created with the same configuration. You can modify any fields before submitting.
+      </div>
+      <div class="form-row">
+        <div class="ff">
+          <label>Teacher ID <span class="req">*</span></label>
+          <input id="rc-tid" placeholder="Separate by line break or comma">
+          <div class="ff-hint" style="display:flex;align-items:center;justify-content:flex-end;margin-top:4px">
+            <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;color:#1565c0;font-size:11px;font-weight:500;white-space:nowrap">
+              <i class="ti ti-upload" style="font-size:13px" aria-hidden="true"></i>
+              Upload Excel
+              <input type="file" accept=".xlsx,.xls" style="display:none" onchange="handleExcelUpload(this)">
+            </label>
+          </div>
+        </div>
+        <div class="ff">
+          <label>Task Name</label>
+          <input id="rc-taskname" placeholder="">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff">
+          <label>Course Type <span class="req">*</span></label>
+          <select id="rc-course"><option value="">Please select</option><option>Trial</option><option>Regular</option></select>
+        </div>
+        <div class="ff">
+          <label>Business Line <span class="req">*</span></label>
+          <select id="rc-bl"><option value="">Please select (multi-select supported)</option><option>VIPEnglish</option><option>G-New</option><option>Korean</option><option>Tigerscool</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff">
+          <label>Monitor Period <span class="req">*</span></label>
+          <div class="date-range" style="gap:6px">
+            <input type="date" lang="en-US" id="rc-date-start" style="flex:1;height:32px;border:1px solid #d9d9d9;border-radius:3px;padding:0 8px;font-size:12px;background:#fff">
+            <span style="color:#999;font-size:12px">to</span>
+            <input type="date" lang="en-US" id="rc-date-end" style="flex:1;height:32px;border:1px solid #d9d9d9;border-radius:3px;padding:0 8px;font-size:12px;background:#fff">
+          </div>
+        </div>
+        <div class="ff">
+          <label>Sampling Rate <span class="req">*</span></label>
+          <div class="rate-row">
+            <input type="number" id="rc-rate" value="1" min="1" max="100">
+            <span style="font-size:12px;color:#555">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff">
+          <label>Lesson SN</label>
+          <input id="rc-lesson" placeholder="">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff form-full">
+          <label>Monitor Type <span class="req">*</span></label>
+          <div class="cb-group">
+            <label class="cb-item"><input type="checkbox" id="rc-pacing" checked> Pacing Monitor</label>
+            <label class="cb-item off"><input type="checkbox" disabled> Behavior Monitor</label>
+            <label class="cb-item off"><input type="checkbox" disabled> Sensitive Content Monitor</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('reCreateModal')">Cancel</button>
+      <button class="btn-submit" onclick="submitReCreate()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- RETRY MODAL -->
+<div class="overlay" id="retryModal">
+  <div class="modal modal-sm">
+    <div class="modal-hd">
+      <div class="modal-hd-title"><i class="ti ti-refresh" style="font-size:15px" aria-hidden="true"></i> Retry Task</div>
+      <button class="modal-close" onclick="closeModal('retryModal')" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-txt">Retry dispatching task <strong id="retryTaskId"></strong>?</div>
+      <div style="font-size:12px;color:#555;background:#f5f5f5;padding:8px 12px;border-radius:3px;margin-top:10px;line-height:1.6">
+        The system will re-attempt to dispatch this task using the original configuration. No changes will be made to the task settings.
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('retryModal')">Cancel</button>
+      <button class="btn-submit" onclick="confirmRetry()">Confirm Retry</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-hd-title"><i class="ti ti-edit" style="font-size:15px" aria-hidden="true"></i> Edit Task</div>
+      <button class="modal-close" onclick="closeModal('editModal')" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:#0c447c;background:#e6f1fb;padding:8px 12px;border-radius:3px;border-left:3px solid #1565c0;margin-bottom:16px">
+        Task is in Pending status. All fields are editable.
+      </div>
+      <div class="form-row">
+        <div class="ff">
+          <label>Teacher ID <span class="req">*</span></label>
+          <input id="edit-tid" placeholder="Separate by line break or comma">
+          <div class="ff-hint" style="display:flex;align-items:center;justify-content:flex-end;margin-top:4px">
+            <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;color:#1565c0;font-size:11px;font-weight:500;white-space:nowrap">
+              <i class="ti ti-upload" style="font-size:13px" aria-hidden="true"></i>
+              Upload Excel
+              <input type="file" accept=".xlsx,.xls" style="display:none" onchange="handleExcelUpload(this)">
+            </label>
+          </div>
+        </div>
+        <div class="ff">
+          <label>Task Name</label>
+          <input id="edit-taskname" placeholder="">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff">
+          <label>Course Type <span class="req">*</span></label>
+          <select id="edit-course"><option value="">Please select</option><option>Trial</option><option>Regular</option></select>
+        </div>
+        <div class="ff">
+          <label>Business Line <span class="req">*</span></label>
+          <select id="edit-bl"><option value="">Please select (multi-select supported)</option><option>VIPEnglish</option><option>G-New</option><option>Korean</option><option>Tigerscool</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff">
+          <label>Monitor Period <span class="req">*</span></label>
+          <div class="date-range" style="gap:6px">
+            <input type="date" lang="en-US" id="edit-date-start" style="flex:1;height:32px;border:1px solid #d9d9d9;border-radius:3px;padding:0 8px;font-size:12px;background:#fff">
+            <span style="color:#999;font-size:12px">to</span>
+            <input type="date" lang="en-US" id="edit-date-end" style="flex:1;height:32px;border:1px solid #d9d9d9;border-radius:3px;padding:0 8px;font-size:12px;background:#fff">
+          </div>
+        </div>
+        <div class="ff">
+          <label>Sampling Rate <span class="req">*</span></label>
+          <div class="rate-row">
+            <input type="number" id="edit-rate" value="1" min="1" max="100">
+            <span style="font-size:12px;color:#555">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff">
+          <label>Lesson SN</label>
+          <input id="edit-lesson" placeholder="">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="ff form-full">
+          <label>Monitor Type <span class="req">*</span></label>
+          <div class="cb-group">
+            <label class="cb-item"><input type="checkbox" checked> Pacing Monitor</label>
+            <label class="cb-item off"><input type="checkbox" disabled> Behavior Monitor</label>
+            <label class="cb-item off"><input type="checkbox" disabled> Sensitive Content Monitor</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('editModal')">Cancel</button>
+      <button class="btn-submit" onclick="submitEdit()">Save</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
